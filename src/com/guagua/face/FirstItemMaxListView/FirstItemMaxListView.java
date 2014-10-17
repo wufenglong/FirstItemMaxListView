@@ -18,56 +18,58 @@ package com.guagua.face.FirstItemMaxListView;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 
 public class FirstItemMaxListView extends ListView {
 
-	private int mItemCount;
-	private int mItemOffsetY[];
-	private boolean scrollIsComputed = false;
-	private int mHeight;
+    private int mItemCount;
+    private int mItemOffsetY[];
+    private boolean scrollIsComputed = false;
+    private int mHeight;
 
-	public FirstItemMaxListView(Context context) {
-		super(context);
-	}
+    public FirstItemMaxListView(Context context) {
+        super(context);
+    }
 
-	public FirstItemMaxListView(Context context, AttributeSet attrs) {
-		super(context, attrs);
-	}
+    public FirstItemMaxListView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 
-	public int getListHeight() {
-		return mHeight;
-	}
+    public int getListHeight() {
+        return mHeight;
+    }
 
-	public void computeScrollY() {//head+foot+item的总高
-		mHeight = 0;
-		mItemCount = getAdapter().getCount();
-		if (mItemOffsetY == null) {
-			mItemOffsetY = new int[mItemCount];
-		}
-		for (int i = 0; i < mItemCount; ++i) {
-			View view = getAdapter().getView(i, null, this);
-			view.measure(
-					MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
-					MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
-			mItemOffsetY[i] = mHeight;
-			mHeight += view.getMeasuredHeight();
-		}
-		scrollIsComputed = true;
-	}
+    public void computeScrollY() {//head+foot+item的总高
+        mHeight = 0;
+        mItemCount = getAdapter().getCount();
+        if (mItemOffsetY == null) {
+            mItemOffsetY = new int[mItemCount];
+        }
+        for (int i = 0; i < mItemCount; ++i) {
+            View view = getAdapter().getView(i, null, this);
+            view.measure(
+                    MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
+                    MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+            mItemOffsetY[i] = mHeight;
+            mHeight += view.getMeasuredHeight();
+        }
+        Log.d("wufl", "mHeight=" + mHeight);
+        scrollIsComputed = true;
+    }
 
-	public boolean scrollYIsComputed() {
-		return scrollIsComputed;
-	}
+    public boolean scrollYIsComputed() {
+        return scrollIsComputed;
+    }
 
-	public int getComputedScrollY() {
-		int pos, nScrollY, nItemY;
-		View view = null;
-		pos = getFirstVisiblePosition();
-		view = getChildAt(0);
-		nItemY = view.getTop();
-		nScrollY = mItemOffsetY[pos] - nItemY;
-		return nScrollY;
-	}
+    public int getComputedScrollY() {
+        int pos, nScrollY, nItemY;
+        View view = null;
+        pos = getFirstVisiblePosition();
+        view = getChildAt(0);
+        nItemY = view.getTop();
+        nScrollY = mItemOffsetY[pos] - nItemY;
+        return nScrollY;
+    }
 }
