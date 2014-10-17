@@ -54,9 +54,7 @@ public class FirstItemMaxListView extends ListView {
                     MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
             mItemOffsetY[i] = mHeight;
             mHeight += view.getMeasuredHeight();
-            Log.d("wufl", "mItemOffsetY["+i+"]=" + mItemOffsetY[i]);
         }
-        Log.d("wufl", "mHeight=" + mHeight);
         scrollIsComputed = true;
     }
 
@@ -70,7 +68,6 @@ public class FirstItemMaxListView extends ListView {
         pos = getFirstVisiblePosition()+1;
         view = getChildAt(1);
         nItemY = view.getTop();
-        Log.d("wufl","childAt(1).getTop="+nItemY);
         nScrollY = mItemOffsetY[pos] - nItemY;
         return nScrollY;
     }

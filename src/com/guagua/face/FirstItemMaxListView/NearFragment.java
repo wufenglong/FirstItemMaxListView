@@ -18,11 +18,13 @@ package com.guagua.face.FirstItemMaxListView;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -38,6 +40,40 @@ public class NearFragment extends Fragment {
     private int mScrollY;//Y方向滚动高
     private int mLastScrollY;//记忆上次滚动高
     private int mScrollState = -1;
+    private boolean isGestureScroll = false;
+    private int mScreenWidth=0;
+    private GestureDetector mGestureDetector = new GestureDetector(new GestureDetector.OnGestureListener() {
+        @Override
+        public boolean onDown(MotionEvent e) {
+            isGestureScroll = true;
+            return false;
+        }
+
+        @Override
+        public void onShowPress(MotionEvent e) {
+
+        }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            return false;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            return false;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            return false;
+        }
+    });
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -50,6 +86,10 @@ public class NearFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        WindowManager wm = (WindowManager) getActivity()
+                .getSystemService(Context.WINDOW_SERVICE);
+
+        mScreenWidth = wm.getDefaultDisplay().getWidth();
         mItemHeight = getResources().getDimensionPixelSize(R.dimen.item_height);
 
         mAdapter = new FirstItemMaxAdapter();
@@ -59,29 +99,43 @@ public class NearFragment extends Fragment {
             public void onGlobalLayout() {
                 if (!mListView.scrollYIsComputed()) {
                     mListView.computeScrollY();
-                    Log.d("wufl", "xxxxxxxxxxx");
                 }
             }
         });
-
+        mListView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return mGestureDetector.onTouchEvent(event);
+            }
+        });
         mListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
                 mScrollState = scrollState;
+                if (mScrollState == SCROLL_STATE_IDLE) {
+                    isGestureScroll = false;
+                }
             }
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (!isGestureScroll) {
+                    return;
+                }
+                if (mScrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+                    return;
+                }
                 mScrollY = 0;
                 if (mListView.scrollYIsComputed()) {
                     mScrollY = mListView.getComputedScrollY();
                 }
-                if (mScrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) return;
-                if (mScrollY == mLastScrollY) return;
+
+                if (mScrollY == mLastScrollY) {
+                    return;
+                }
                 if (mListView.scrollYIsComputed()) {
                     View item0 = mListView.getChildAt(0);
                     View item1 = mListView.getChildAt(1);
-                    Log.d("wufl", "mScrollY=" + mScrollY + ",mLastScrollY=" + mLastScrollY + ",scroll change=" + (mScrollY - mLastScrollY));
                     int changeHeight = item0.getHeight() - (mScrollY - mLastScrollY);
                     if (changeHeight >= mItemHeight * 2) {
                         changeHeight = mItemHeight * 2;
@@ -129,6 +183,36 @@ public class NearFragment extends Fragment {
             Item item17 = new Item("李十八", R.drawable.image4, null);
             Item item18 = new Item("张十九", R.drawable.image5, null);
             Item item19 = new Item("李二十", R.drawable.image6, null);
+            Item item20 = new Item("张十一", R.drawable.image4, null);
+            Item item21 = new Item("李十二", R.drawable.image5, null);
+            Item item22 = new Item("张十三", R.drawable.image6, null);
+            Item item23 = new Item("李十四", R.drawable.image7, null);
+            Item item24 = new Item("张十五", R.drawable.image1, null);
+            Item item25 = new Item("李十六", R.drawable.image2, null);
+            Item item26 = new Item("张十七", R.drawable.image3, null);
+            Item item27 = new Item("李十八", R.drawable.image4, null);
+            Item item28 = new Item("张十九", R.drawable.image5, null);
+            Item item29 = new Item("李二十", R.drawable.image6, null);
+            Item item30 = new Item("张十一", R.drawable.image4, null);
+            Item item31 = new Item("李十二", R.drawable.image5, null);
+            Item item32 = new Item("张十三", R.drawable.image6, null);
+            Item item33 = new Item("李十四", R.drawable.image7, null);
+            Item item34 = new Item("张十五", R.drawable.image1, null);
+            Item item35 = new Item("李十六", R.drawable.image2, null);
+            Item item36 = new Item("张十七", R.drawable.image3, null);
+            Item item37 = new Item("李十八", R.drawable.image4, null);
+            Item item38 = new Item("张十九", R.drawable.image5, null);
+            Item item39 = new Item("李二十", R.drawable.image6, null);
+            Item item40 = new Item("张十一", R.drawable.image4, null);
+            Item item41 = new Item("李十二", R.drawable.image5, null);
+            Item item42 = new Item("张十三", R.drawable.image6, null);
+            Item item43 = new Item("李十四", R.drawable.image7, null);
+            Item item44 = new Item("张十五", R.drawable.image1, null);
+            Item item45 = new Item("李十六", R.drawable.image2, null);
+            Item item46 = new Item("张十七", R.drawable.image3, null);
+            Item item47 = new Item("李十八", R.drawable.image4, null);
+            Item item48 = new Item("张十九", R.drawable.image5, null);
+            Item item49 = new Item("李二十", R.drawable.image6, null);
             mDataSources.add(item0);
             mDataSources.add(item1);
             mDataSources.add(item2);
@@ -149,6 +233,36 @@ public class NearFragment extends Fragment {
             mDataSources.add(item17);
             mDataSources.add(item18);
             mDataSources.add(item19);
+            mDataSources.add(item20);
+            mDataSources.add(item21);
+            mDataSources.add(item22);
+            mDataSources.add(item23);
+            mDataSources.add(item24);
+            mDataSources.add(item25);
+            mDataSources.add(item26);
+            mDataSources.add(item27);
+            mDataSources.add(item28);
+            mDataSources.add(item29);
+            mDataSources.add(item30);
+            mDataSources.add(item31);
+            mDataSources.add(item32);
+            mDataSources.add(item33);
+            mDataSources.add(item34);
+            mDataSources.add(item35);
+            mDataSources.add(item36);
+            mDataSources.add(item37);
+            mDataSources.add(item38);
+            mDataSources.add(item39);
+            mDataSources.add(item40);
+            mDataSources.add(item41);
+            mDataSources.add(item42);
+            mDataSources.add(item43);
+            mDataSources.add(item44);
+            mDataSources.add(item45);
+            mDataSources.add(item46);
+            mDataSources.add(item47);
+            mDataSources.add(item48);
+            mDataSources.add(item49);
         }
 
         @Override
