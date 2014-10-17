@@ -18,6 +18,7 @@ package com.guagua.face.FirstItemMaxListView;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,7 @@ public class NearFragment extends Fragment {
     private int mItemHeight;//标准item高
     private int mScrollY;//Y方向滚动高
     private int mLastScrollY;//记忆上次滚动高
+    private int mScrollState = -1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -55,26 +57,32 @@ public class NearFragment extends Fragment {
         mListView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                mListView.computeScrollY();
+                if (!mListView.scrollYIsComputed()) {
+                    mListView.computeScrollY();
+                    Log.d("wufl", "xxxxxxxxxxx");
+                }
             }
         });
+
         mListView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
-
+                mScrollState = scrollState;
             }
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 mScrollY = 0;
-
                 if (mListView.scrollYIsComputed()) {
                     mScrollY = mListView.getComputedScrollY();
                 }
+                if (mScrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) return;
+                if (mScrollY == mLastScrollY) return;
                 if (mListView.scrollYIsComputed()) {
                     View item0 = mListView.getChildAt(0);
                     View item1 = mListView.getChildAt(1);
-                    int changeHeight = item0.getHeight() - (mScrollY - mLastScrollY) - 2;
+                    Log.d("wufl", "mScrollY=" + mScrollY + ",mLastScrollY=" + mLastScrollY + ",scroll change=" + (mScrollY - mLastScrollY));
+                    int changeHeight = item0.getHeight() - (mScrollY - mLastScrollY);
                     if (changeHeight >= mItemHeight * 2) {
                         changeHeight = mItemHeight * 2;
                     }
@@ -90,8 +98,8 @@ public class NearFragment extends Fragment {
                     }
                     item0.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight));
                     item1.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight1));
-                    mLastScrollY = mScrollY;
                 }
+                mLastScrollY = mScrollY;
             }
         });
     }
@@ -161,14 +169,17 @@ public class NearFragment extends Fragment {
         @Override
         public View getView(int position, View view, ViewGroup viewGroup) {
             ViewHolder viewHolder;
-            if (view == null) {
-                view = LayoutInflater.from(getActivity()).inflate(R.layout.first_item_max_item, null);
-                viewHolder = new ViewHolder();
-                viewHolder.cover = (ImageView) view.findViewById(R.id.cover);
-                view.setTag(viewHolder);
+            view = LayoutInflater.from(getActivity()).inflate(R.layout.first_item_max_item, null);
+            viewHolder = new ViewHolder();
+            if (position == 0) {
+                view.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, mItemHeight * 2));
             } else {
-                viewHolder = (ViewHolder) view.getTag();
+                view.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, mItemHeight));
             }
+
+            viewHolder.cover = (ImageView) view.findViewById(R.id.cover);
+
+            viewHolder.cover.setScaleType(ImageView.ScaleType.CENTER_CROP);
             viewHolder.cover.setImageResource(mDataSources.get(position).imgId);
             return view;
         }
