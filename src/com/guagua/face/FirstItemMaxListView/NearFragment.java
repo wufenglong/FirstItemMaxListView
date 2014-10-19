@@ -18,6 +18,7 @@ package com.guagua.face.FirstItemMaxListView;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -37,15 +38,14 @@ public class NearFragment extends Fragment {
     private Context mContext;
     private FirstItemMaxAdapter mAdapter;
     private int mItemHeight;//标准item高
-    private int mScrollY;//Y方向滚动高
-    private int mLastScrollY;//记忆上次滚动高
     private int mScrollState = -1;
-    private boolean isGestureScroll = false;
-    private int mScreenWidth=0;
+    private int mScreenWidth = 0;
+    private int mLastFirstVisiblePosition;
+    private int distanceOneItem;
+    private boolean isNoScroll = false;
     private GestureDetector mGestureDetector = new GestureDetector(new GestureDetector.OnGestureListener() {
         @Override
         public boolean onDown(MotionEvent e) {
-            isGestureScroll = true;
             return false;
         }
 
@@ -61,6 +61,75 @@ public class NearFragment extends Fragment {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            mListView.smoothScrollBy((int) distanceY, 0);
+            if (mScrollState != AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+                distanceOneItem += distanceY;
+            }
+            View item0 = mListView.getChildAt(0);
+            View item1 = mListView.getChildAt(1);
+            int firstVisiblePostion = mListView.getFirstVisiblePosition();
+            /*if (firstVisiblePostion == 0 && item0.getHeight() == mScreenWidth && distanceY < 0) {
+                distanceOneItem = 0;
+            }*/
+            if (firstVisiblePostion == mLastFirstVisiblePosition) {
+                mLastFirstVisiblePosition = firstVisiblePostion;
+            } else {
+                mLastFirstVisiblePosition = firstVisiblePostion;
+                distanceOneItem = 0;
+                Log.d("wufl", "向上 changed item 。。。。。。。。。。。。。");
+                return false;
+            }
+
+            int changeHeight1 = 0;
+            int change = 0;
+            int changeHeight = 0;
+            if (distanceOneItem == 0) return false;
+            if (distanceOneItem > 0) {
+                changeHeight1 = distanceOneItem * mScreenWidth / mItemHeight;//放大
+
+                if (changeHeight1 > mScreenWidth) {
+                    changeHeight1 = mScreenWidth;
+                }
+                if (changeHeight1 <= mItemHeight) {
+                    changeHeight1 = mItemHeight;
+                }
+                change = changeHeight1 - item1.getHeight();
+                changeHeight = item0.getHeight() - change;
+                if (changeHeight > mScreenWidth) {
+                    changeHeight = mScreenWidth;
+                }
+                if (changeHeight <= mItemHeight) {
+                    changeHeight = mItemHeight;
+                }
+
+                item0.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight));
+                item1.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight1));
+
+                Log.d("wufl", "向上 distanceOneItem=" + distanceOneItem + ",distanceY＝" + distanceY + ",changeHeight1=" + changeHeight1 + ",change=" + change + ",changeHeight=" + changeHeight);
+            } else {
+                Log.d("wufl","item0.getTop()="+item0.getTop()+",item1.getTop()"+item1.getTop());
+
+                changeHeight1 = (mItemHeight+distanceOneItem) * mScreenWidth / mItemHeight;//缩小
+                if (changeHeight1 > mScreenWidth) {
+                    changeHeight1 = mScreenWidth;
+                }
+                if (changeHeight1 <= mItemHeight) {
+                    changeHeight1 = mItemHeight;
+                }
+                change = item1.getHeight()-changeHeight1;
+                changeHeight = item0.getHeight() + change;//放大
+                if (changeHeight > mScreenWidth) {
+                    changeHeight = mScreenWidth;
+                }
+                if (changeHeight <= mItemHeight) {
+                    changeHeight = mItemHeight;
+                }
+                item0.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight));
+                item1.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight1));
+                Log.d("wufl", "向下 distanceOneItem=" + distanceOneItem + ",distanceY＝" + distanceY + ",changeHeight1=" + changeHeight1 + ",change=" + change + ",changeHeight=" + changeHeight);
+            }
+
+
             return false;
         }
 
@@ -74,6 +143,7 @@ public class NearFragment extends Fragment {
             return false;
         }
     });
+    private boolean isFisrt = true;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -91,17 +161,17 @@ public class NearFragment extends Fragment {
 
         mScreenWidth = wm.getDefaultDisplay().getWidth();
         mItemHeight = getResources().getDimensionPixelSize(R.dimen.item_height);
-
+        Log.d("wufl", "itemHeight=" + mItemHeight + ",mScreenWidth=" + mScreenWidth);
         mAdapter = new FirstItemMaxAdapter();
         mListView.setAdapter(mAdapter);
-        mListView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        /*mListView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 if (!mListView.scrollYIsComputed()) {
                     mListView.computeScrollY();
                 }
             }
-        });
+        });*/
         mListView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -112,14 +182,31 @@ public class NearFragment extends Fragment {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
                 mScrollState = scrollState;
-                if (mScrollState == SCROLL_STATE_IDLE) {
-                    isGestureScroll = false;
+                switch (scrollState) {
+                    // 当不滚动时
+                    case AbsListView.OnScrollListener.SCROLL_STATE_IDLE:
+                        // 判断滚动到底部
+                        if (view.getLastVisiblePosition() == (view.getCount() - 1)) {
+                            isNoScroll = true;
+                        }
+                        // 判断滚动到顶部
+                        if (view.getFirstVisiblePosition() == 0) {
+                            isNoScroll = true;
+                        }
+                        break;
                 }
             }
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (!isGestureScroll) {
+                if (firstVisibleItem == 0) {
+                    isNoScroll = true;
+                } else if (visibleItemCount + firstVisibleItem == totalItemCount) {
+                    isNoScroll = true;
+                } else {
+                    isNoScroll = false;
+                }
+                /*if (!isGestureScroll) {
                     return;
                 }
                 if (mScrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
@@ -134,26 +221,26 @@ public class NearFragment extends Fragment {
                     return;
                 }
                 if (mListView.scrollYIsComputed()) {
-                    View item0 = mListView.getChildAt(0);
+                    //View item0 = mListView.getChildAt(0);
                     View item1 = mListView.getChildAt(1);
-                    int changeHeight = item0.getHeight() - (mScrollY - mLastScrollY);
+                    *//*int changeHeight = item0.getHeight() - (mScrollY - mLastScrollY);
                     if (changeHeight >= mItemHeight * 2) {
                         changeHeight = mItemHeight * 2;
                     }
                     if (changeHeight <= mItemHeight) {
                         changeHeight = mItemHeight;
-                    }
+                    }*//*
                     int changeHeight1 = (mScrollY - mLastScrollY) + item1.getHeight();
-                    if (changeHeight1 >= mItemHeight * 2) {
-                        changeHeight1 = mItemHeight * 2;
+                    if (changeHeight1 >= mScreenWidth) {
+                        changeHeight1 = mScreenWidth;
                     }
                     if (changeHeight1 <= mItemHeight) {
                         changeHeight1 = mItemHeight;
                     }
-                    item0.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight));
+                    //item0.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight));
                     item1.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight1));
                 }
-                mLastScrollY = mScrollY;
+                mLastScrollY = mScrollY;*/
             }
         });
     }
@@ -285,12 +372,12 @@ public class NearFragment extends Fragment {
             ViewHolder viewHolder;
             view = LayoutInflater.from(getActivity()).inflate(R.layout.first_item_max_item, null);
             viewHolder = new ViewHolder();
-            if (position == 0) {
-                view.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, mItemHeight * 2));
+            if (position == 0 && isFisrt) {
+                isFisrt = false;
+                view.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, mScreenWidth));
             } else {
                 view.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, mItemHeight));
             }
-
             viewHolder.cover = (ImageView) view.findViewById(R.id.cover);
 
             viewHolder.cover.setScaleType(ImageView.ScaleType.CENTER_CROP);

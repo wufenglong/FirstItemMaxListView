@@ -65,8 +65,8 @@ public class FirstItemMaxListView extends ListView {
     public int getComputedScrollY() {
         int pos, nScrollY, nItemY;
         View view = null;
-        pos = getFirstVisiblePosition()+1;
-        view = getChildAt(1);
+        pos = getFirstVisiblePosition();
+        view = getChildAt(0);
         nItemY = view.getTop();
         nScrollY = mItemOffsetY[pos] - nItemY;
         return nScrollY;
