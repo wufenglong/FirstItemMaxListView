@@ -71,6 +71,7 @@ public class FirstItemMaxListView extends ListView {
         nScrollY = mItemOffsetY[pos] - nItemY;
         return nScrollY;
     }
+
     /**
      * Check if this view can be scrolled vertically in a certain direction.
      *
@@ -78,6 +79,10 @@ public class FirstItemMaxListView extends ListView {
      * @return true if this view can be scrolled in the specified direction, false otherwise.
      */
     public boolean canScrollVertically(int direction) {
+//        Log.d("wufl","getHeight="+getHeight());
+//        Log.d("wufl", "canScrollVertically computeVerticalScrollOffset="
+//                + computeVerticalScrollOffset() + ",computeVerticalScrollExtent=" + computeVerticalScrollExtent()
+//                + ",computeVerticalScrollRange=" + computeVerticalScrollRange());
         final int offset = computeVerticalScrollOffset();
         final int range = computeVerticalScrollRange() - computeVerticalScrollExtent();
         if (range == 0) return false;
