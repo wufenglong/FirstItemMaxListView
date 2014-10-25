@@ -42,7 +42,7 @@ public class NearFragment extends Fragment {
     private int mScreenWidth = 0;
     private int mLastFirstVisiblePosition = 0;
     private int distanceOneItem;
-    private int mLastDistanceOneItem;
+    private int mLastDistanceOneItem = 1;
     private GestureDetector mGestureDetector = new GestureDetector(new GestureDetector.OnGestureListener() {
         @Override
         public boolean onDown(MotionEvent e) {
@@ -75,9 +75,10 @@ public class NearFragment extends Fragment {
                 }
             }
 
-            Log.d("wufl", "distanceOneItem=" + distanceOneItem);
+            Log.d("wufl", "distanceOneItem=" + distanceOneItem + ",mLastDistanceOneItem=" + mLastDistanceOneItem);
             if (mListView.getFirstVisiblePosition() == mLastFirstVisiblePosition) {
-                if ((mLastDistanceOneItem >= 0 && distanceOneItem < 0)) {//从正变负，但是firstposition没变
+                if ((distanceY < 0 && (mLastDistanceOneItem >= 0 && distanceOneItem < 0))
+                        || (distanceY > 0 && (mLastDistanceOneItem <= 0 && distanceOneItem > 0))) {//从正变负，但是firstposition没变
 //                    distanceOneItem = mLastDistanceOneItem;
                     Log.d("wufl", "distanceOneItem 从正变负，但是firstposition没变 return");
                     return false;
@@ -89,7 +90,11 @@ public class NearFragment extends Fragment {
                 mLastFirstVisiblePosition = mListView.getFirstVisiblePosition();
                 distanceOneItem = 0;
                 Log.d("wufl", "onFirstPostionChanged...");
-                mLastDistanceOneItem = -1;
+                if (distanceY > 0) {
+                    mLastDistanceOneItem = 1;
+                } else {
+                    mLastDistanceOneItem = -1;
+                }
             }
 
             View item0 = mListView.getChildAt(0);
