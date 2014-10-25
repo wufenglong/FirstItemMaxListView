@@ -62,6 +62,7 @@ public class NearFragment extends Fragment {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             mListView.smoothScrollBy((int) distanceY, 0);
+            Log.d("wufl","onScroll "+mListView.canScrollVertically(Math.round(distanceY)));
             if (mScrollState != AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
                 distanceOneItem += distanceY;
             }
