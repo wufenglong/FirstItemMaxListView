@@ -33,7 +33,7 @@ import java.util.ArrayList;
 
 /**
  * 通过手势滑动控制Listview的滚动
- * write by wufl.
+ * write by wufenglong.
  */
 public class NearFragment extends Fragment {
     private FirstItemMaxListView mListView;

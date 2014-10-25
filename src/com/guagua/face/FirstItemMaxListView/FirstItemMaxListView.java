@@ -26,7 +26,7 @@ import android.widget.ListView;
 
 /**
  * 通过手势滑动控制Listview的滚动
- * write by wufl.
+ * write by wufenglong.
  */
 public class FirstItemMaxListView extends ListView {
     private int ITEM_HEIGHT;//标准item高,
@@ -53,6 +53,7 @@ public class FirstItemMaxListView extends ListView {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             smoothScrollBy(Math.round(distanceY), 0);
+
             if (canScrollVertically(Math.round(distanceY))) {
                 distanceOneItem += Math.round(distanceY);
             } else {
@@ -81,52 +82,7 @@ public class FirstItemMaxListView extends ListView {
                     mLastDistanceOneItem = -1;
                 }
             }
-
-            View item0 = getChildAt(0);
-            View item1 = getChildAt(1);
-
-            int changeHeight1;
-            int change;
-            int changeHeight;
-            if (distanceOneItem == 0) return false;
-            if (distanceOneItem > 0) {
-                changeHeight1 = distanceOneItem * mITEM_MAX_HEIGHT / ITEM_HEIGHT;//放大
-
-                if (changeHeight1 > mITEM_MAX_HEIGHT) {
-                    changeHeight1 = mITEM_MAX_HEIGHT;
-                }
-                if (changeHeight1 <= ITEM_HEIGHT) {
-                    changeHeight1 = ITEM_HEIGHT;
-                }
-                change = changeHeight1 - item1.getHeight();
-                changeHeight = item0.getHeight() - change;
-                if (changeHeight > mITEM_MAX_HEIGHT) {
-                    changeHeight = mITEM_MAX_HEIGHT;
-                }
-                if (changeHeight <= ITEM_HEIGHT) {
-                    changeHeight = ITEM_HEIGHT;
-                }
-                item0.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight));
-                item1.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight1));
-            } else {
-                changeHeight1 = (ITEM_HEIGHT + distanceOneItem) * mITEM_MAX_HEIGHT / ITEM_HEIGHT;//缩小
-                if (changeHeight1 > mITEM_MAX_HEIGHT) {
-                    changeHeight1 = mITEM_MAX_HEIGHT;
-                }
-                if (changeHeight1 <= ITEM_HEIGHT) {
-                    changeHeight1 = ITEM_HEIGHT;
-                }
-                change = item1.getHeight() - changeHeight1;
-                changeHeight = item0.getHeight() + change;//放大
-                if (changeHeight > mITEM_MAX_HEIGHT) {
-                    changeHeight = mITEM_MAX_HEIGHT;
-                }
-                if (changeHeight <= ITEM_HEIGHT) {
-                    changeHeight = ITEM_HEIGHT;
-                }
-                item0.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight));
-                item1.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight1));
-            }
+            changeItemHeightOnScroll();
             return false;
         }
 
@@ -158,6 +114,54 @@ public class FirstItemMaxListView extends ListView {
                 return mGestureDetector.onTouchEvent(event);
             }
         });
+    }
+
+    private void changeItemHeightOnScroll() {
+        View item0 = getChildAt(0);
+        View item1 = getChildAt(1);
+
+        int changeHeight1;
+        int change;
+        int changeHeight;
+        if (distanceOneItem == 0) return;
+        if (distanceOneItem > 0) {
+            changeHeight1 = distanceOneItem * mITEM_MAX_HEIGHT / ITEM_HEIGHT;//放大
+
+            if (changeHeight1 > mITEM_MAX_HEIGHT) {
+                changeHeight1 = mITEM_MAX_HEIGHT;
+            }
+            if (changeHeight1 <= ITEM_HEIGHT) {
+                changeHeight1 = ITEM_HEIGHT;
+            }
+            change = changeHeight1 - item1.getHeight();
+            changeHeight = item0.getHeight() - change;
+            if (changeHeight > mITEM_MAX_HEIGHT) {
+                changeHeight = mITEM_MAX_HEIGHT;
+            }
+            if (changeHeight <= ITEM_HEIGHT) {
+                changeHeight = ITEM_HEIGHT;
+            }
+            item0.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight));
+            item1.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight1));
+        } else {
+            changeHeight1 = (ITEM_HEIGHT + distanceOneItem) * mITEM_MAX_HEIGHT / ITEM_HEIGHT;//缩小
+            if (changeHeight1 > mITEM_MAX_HEIGHT) {
+                changeHeight1 = mITEM_MAX_HEIGHT;
+            }
+            if (changeHeight1 <= ITEM_HEIGHT) {
+                changeHeight1 = ITEM_HEIGHT;
+            }
+            change = item1.getHeight() - changeHeight1;
+            changeHeight = item0.getHeight() + change;//放大
+            if (changeHeight > mITEM_MAX_HEIGHT) {
+                changeHeight = mITEM_MAX_HEIGHT;
+            }
+            if (changeHeight <= ITEM_HEIGHT) {
+                changeHeight = ITEM_HEIGHT;
+            }
+            item0.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight));
+            item1.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight1));
+        }
     }
 
     public int getItemHeight() {
