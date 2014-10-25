@@ -35,10 +35,8 @@ import java.util.ArrayList;
 
 public class NearFragment extends Fragment {
     private FirstItemMaxListView mListView;
-    private Context mContext;
     private FirstItemMaxAdapter mAdapter;
     private int mItemHeight;//标准item高
-    private int mScrollState = -1;
     private int mScreenWidth = 0;
     private int mLastFirstVisiblePosition = 0;
     private int distanceOneItem;
@@ -62,24 +60,22 @@ public class NearFragment extends Fragment {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             mListView.smoothScrollBy(Math.round(distanceY), 0);
-            if (distanceY > 0) {
-
+            if (mListView.canScrollVertically(Math.round(distanceY))) {
+                Log.d("wufl", "canScrollVertically=" + true);
+                distanceOneItem += Math.round(distanceY);
             } else {
-
-            }
-            if (mScrollState != AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
-                if (mListView.canScrollVertically(Math.round(distanceY))) {
-                    distanceOneItem += Math.round(distanceY);
+                distanceOneItem = 0;
+                if (distanceY > 0) {
+                    mLastDistanceOneItem = -1;
                 } else {
-                    distanceOneItem = 0;
+                    mLastDistanceOneItem = 1;
                 }
             }
 
-            Log.d("wufl", "distanceOneItem=" + distanceOneItem + ",mLastDistanceOneItem=" + mLastDistanceOneItem);
+            Log.d("wufl", "distanceY=" + distanceY + ",distanceOneItem=" + distanceOneItem + ",mLastDistanceOneItem=" + mLastDistanceOneItem);
             if (mListView.getFirstVisiblePosition() == mLastFirstVisiblePosition) {
                 if ((distanceY < 0 && (mLastDistanceOneItem >= 0 && distanceOneItem < 0))
-                        || (distanceY > 0 && (mLastDistanceOneItem <= 0 && distanceOneItem > 0))) {//从正变负，但是firstposition没变
-//                    distanceOneItem = mLastDistanceOneItem;
+                        || (distanceY > 0 && (mLastDistanceOneItem < 0 && distanceOneItem >= 0))) {//从正变负或从负变正，但是firstposition没变
                     Log.d("wufl", "distanceOneItem 从正变负，但是firstposition没变 return");
                     return false;
                 } else {
@@ -122,11 +118,8 @@ public class NearFragment extends Fragment {
                 if (changeHeight <= mItemHeight) {
                     changeHeight = mItemHeight;
                 }
-
                 item0.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight));
                 item1.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight1));
-
-                Log.d("wufl", "向上 distanceOneItem=" + distanceOneItem + ",changeHeight1=" + changeHeight1 + ",change=" + change + ",changeHeight=" + changeHeight);
             } else {
                 changeHeight1 = (mItemHeight + distanceOneItem) * mScreenWidth / mItemHeight;//缩小
                 if (changeHeight1 > mScreenWidth) {
@@ -145,9 +138,7 @@ public class NearFragment extends Fragment {
                 }
                 item0.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight));
                 item1.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight1));
-                Log.d("wufl", "向下 distanceOneItem=" + distanceOneItem + ",changeHeight1=" + changeHeight1 + ",change=" + change + ",changeHeight=" + changeHeight);
             }
-
             return false;
         }
 
@@ -182,31 +173,10 @@ public class NearFragment extends Fragment {
         Log.d("wufl", "itemHeight=" + mItemHeight + ",mScreenWidth=" + mScreenWidth);
         mAdapter = new FirstItemMaxAdapter();
         mListView.setAdapter(mAdapter);
-        /*mListView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                if (!mListView.scrollYIsComputed()) {
-                    mListView.computeScrollY();
-                }
-            }
-        });*/
         mListView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return mGestureDetector.onTouchEvent(event);
-            }
-        });
-        mListView.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                mScrollState = scrollState;
-
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
-
             }
         });
     }
