@@ -40,115 +40,7 @@ public class NearFragment extends Fragment {
     private FirstItemMaxAdapter mAdapter;
     private int ITEM_HEIGHT;//标准item高,
     private int mScreenWidth = 0;
-    private int mLastFirstVisiblePosition = 0;
-    private int distanceOneItem;//记录滚动距离，向上滚动时-ITEM_HEIGHT到0，向下滚动是0到ITEM_HEIGHT,当listview FirstVisiblePosition 设置为0
-    private int mLastDistanceOneItem = 1;
-    private GestureDetector mGestureDetector = new GestureDetector(new GestureDetector.OnGestureListener() {
-        @Override
-        public boolean onDown(MotionEvent e) {
-            return false;
-        }
 
-        @Override
-        public void onShowPress(MotionEvent e) {
-
-        }
-
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-            return false;
-        }
-
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            mListView.smoothScrollBy(Math.round(distanceY), 0);
-            if (mListView.canScrollVertically(Math.round(distanceY))) {
-                distanceOneItem += Math.round(distanceY);
-            } else {
-                distanceOneItem = 0;
-                if (distanceY > 0) {
-                    mLastDistanceOneItem = -1;
-                } else {
-                    mLastDistanceOneItem = 1;
-                }
-            }
-
-            if (mListView.getFirstVisiblePosition() == mLastFirstVisiblePosition) {
-                if ((distanceY < 0 && (mLastDistanceOneItem >= 0 && distanceOneItem < 0))
-                        || (distanceY > 0 && (mLastDistanceOneItem < 0 && distanceOneItem >= 0))) {//从正变负或从负变正，但是firstposition没变
-                    return false;
-                } else {
-                    mLastDistanceOneItem = distanceOneItem;
-                }
-                mLastFirstVisiblePosition = mListView.getFirstVisiblePosition();
-            } else {
-                mLastFirstVisiblePosition = mListView.getFirstVisiblePosition();
-                distanceOneItem = 0;
-                if (distanceY > 0) {
-                    mLastDistanceOneItem = 1;
-                } else {
-                    mLastDistanceOneItem = -1;
-                }
-            }
-
-            View item0 = mListView.getChildAt(0);
-            View item1 = mListView.getChildAt(1);
-
-            int changeHeight1;
-            int change;
-            int changeHeight;
-            if (distanceOneItem == 0) return false;
-            if (distanceOneItem > 0) {
-                changeHeight1 = distanceOneItem * mScreenWidth / ITEM_HEIGHT;//放大
-
-                if (changeHeight1 > mScreenWidth) {
-                    changeHeight1 = mScreenWidth;
-                }
-                if (changeHeight1 <= ITEM_HEIGHT) {
-                    changeHeight1 = ITEM_HEIGHT;
-                }
-                change = changeHeight1 - item1.getHeight();
-                changeHeight = item0.getHeight() - change;
-                if (changeHeight > mScreenWidth) {
-                    changeHeight = mScreenWidth;
-                }
-                if (changeHeight <= ITEM_HEIGHT) {
-                    changeHeight = ITEM_HEIGHT;
-                }
-                item0.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight));
-                item1.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight1));
-            } else {
-                changeHeight1 = (ITEM_HEIGHT + distanceOneItem) * mScreenWidth / ITEM_HEIGHT;//缩小
-                if (changeHeight1 > mScreenWidth) {
-                    changeHeight1 = mScreenWidth;
-                }
-                if (changeHeight1 <= ITEM_HEIGHT) {
-                    changeHeight1 = ITEM_HEIGHT;
-                }
-                change = item1.getHeight() - changeHeight1;
-                changeHeight = item0.getHeight() + change;//放大
-                if (changeHeight > mScreenWidth) {
-                    changeHeight = mScreenWidth;
-                }
-                if (changeHeight <= ITEM_HEIGHT) {
-                    changeHeight = ITEM_HEIGHT;
-                }
-                item0.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight));
-                item1.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight1));
-            }
-            return false;
-        }
-
-        @Override
-        public void onLongPress(MotionEvent e) {
-
-        }
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            return false;
-        }
-    });
     private boolean isFisrt = true;
 
     @Override
@@ -169,12 +61,8 @@ public class NearFragment extends Fragment {
         ITEM_HEIGHT = getResources().getDimensionPixelSize(R.dimen.item_height);
         mAdapter = new FirstItemMaxAdapter();
         mListView.setAdapter(mAdapter);
-        mListView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return mGestureDetector.onTouchEvent(event);
-            }
-        });
+        mListView.setItemHeight(ITEM_HEIGHT);
+        mListView.setItemMaxHeight(mScreenWidth);
     }
 
     class FirstItemMaxAdapter extends BaseAdapter {
