@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Lars Werkman
+ * Copyright 2014 Lars wufenglong
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 
+/**
+ * 通过手势滑动控制Listview的滚动
+ * write by wufl.
+ */
 public class FirstItemMaxListView extends ListView {
-
-    private int mItemCount;
-    private int mItemOffsetY[];
-    private boolean scrollIsComputed = false;
-    private int mHeight;
 
     public FirstItemMaxListView(Context context) {
         super(context);
@@ -37,41 +36,6 @@ public class FirstItemMaxListView extends ListView {
         super(context, attrs);
     }
 
-    public int getListHeight() {
-        return mHeight;
-    }
-
-    public void computeScrollY() {//head+foot+item的总高
-        mHeight = 0;
-        mItemCount = getAdapter().getCount();
-        if (mItemOffsetY == null) {
-            mItemOffsetY = new int[mItemCount];
-        }
-        for (int i = 0; i < mItemCount; ++i) {
-            View view = getAdapter().getView(i, null, this);
-            view.measure(
-                    MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
-                    MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
-            mItemOffsetY[i] = mHeight;
-            mHeight += view.getMeasuredHeight();
-        }
-        scrollIsComputed = true;
-    }
-
-    public boolean scrollYIsComputed() {
-        return scrollIsComputed;
-    }
-
-    public int getComputedScrollY() {
-        int pos, nScrollY, nItemY;
-        View view = null;
-        pos = getFirstVisiblePosition();
-        view = getChildAt(0);
-        nItemY = view.getTop();
-        nScrollY = mItemOffsetY[pos] - nItemY;
-        return nScrollY;
-    }
-
     /**
      * Check if this view can be scrolled vertically in a certain direction.
      *
@@ -79,10 +43,6 @@ public class FirstItemMaxListView extends ListView {
      * @return true if this view can be scrolled in the specified direction, false otherwise.
      */
     public boolean canScrollVertically(int direction) {
-//        Log.d("wufl","getHeight="+getHeight());
-//        Log.d("wufl", "canScrollVertically computeVerticalScrollOffset="
-//                + computeVerticalScrollOffset() + ",computeVerticalScrollExtent=" + computeVerticalScrollExtent()
-//                + ",computeVerticalScrollRange=" + computeVerticalScrollRange());
         final int offset = computeVerticalScrollOffset();
         final int range = computeVerticalScrollRange() - computeVerticalScrollExtent();
         if (range == 0) return false;

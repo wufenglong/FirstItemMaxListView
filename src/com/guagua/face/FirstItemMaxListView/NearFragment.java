@@ -18,13 +18,11 @@ package com.guagua.face.FirstItemMaxListView;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
@@ -33,13 +31,17 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+/**
+ * 通过手势滑动控制Listview的滚动
+ * write by wufl.
+ */
 public class NearFragment extends Fragment {
     private FirstItemMaxListView mListView;
     private FirstItemMaxAdapter mAdapter;
-    private int mItemHeight;//标准item高
+    private int ITEM_HEIGHT;//标准item高,
     private int mScreenWidth = 0;
     private int mLastFirstVisiblePosition = 0;
-    private int distanceOneItem;
+    private int distanceOneItem;//记录滚动距离，向上滚动时-ITEM_HEIGHT到0，向下滚动是0到ITEM_HEIGHT,当listview FirstVisiblePosition 设置为0
     private int mLastDistanceOneItem = 1;
     private GestureDetector mGestureDetector = new GestureDetector(new GestureDetector.OnGestureListener() {
         @Override
@@ -61,7 +63,6 @@ public class NearFragment extends Fragment {
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             mListView.smoothScrollBy(Math.round(distanceY), 0);
             if (mListView.canScrollVertically(Math.round(distanceY))) {
-                Log.d("wufl", "canScrollVertically=" + true);
                 distanceOneItem += Math.round(distanceY);
             } else {
                 distanceOneItem = 0;
@@ -72,11 +73,9 @@ public class NearFragment extends Fragment {
                 }
             }
 
-            Log.d("wufl", "distanceY=" + distanceY + ",distanceOneItem=" + distanceOneItem + ",mLastDistanceOneItem=" + mLastDistanceOneItem);
             if (mListView.getFirstVisiblePosition() == mLastFirstVisiblePosition) {
                 if ((distanceY < 0 && (mLastDistanceOneItem >= 0 && distanceOneItem < 0))
                         || (distanceY > 0 && (mLastDistanceOneItem < 0 && distanceOneItem >= 0))) {//从正变负或从负变正，但是firstposition没变
-                    Log.d("wufl", "distanceOneItem 从正变负，但是firstposition没变 return");
                     return false;
                 } else {
                     mLastDistanceOneItem = distanceOneItem;
@@ -85,7 +84,6 @@ public class NearFragment extends Fragment {
             } else {
                 mLastFirstVisiblePosition = mListView.getFirstVisiblePosition();
                 distanceOneItem = 0;
-                Log.d("wufl", "onFirstPostionChanged...");
                 if (distanceY > 0) {
                     mLastDistanceOneItem = 1;
                 } else {
@@ -96,45 +94,44 @@ public class NearFragment extends Fragment {
             View item0 = mListView.getChildAt(0);
             View item1 = mListView.getChildAt(1);
 
-
             int changeHeight1;
             int change;
             int changeHeight;
             if (distanceOneItem == 0) return false;
             if (distanceOneItem > 0) {
-                changeHeight1 = distanceOneItem * mScreenWidth / mItemHeight;//放大
+                changeHeight1 = distanceOneItem * mScreenWidth / ITEM_HEIGHT;//放大
 
                 if (changeHeight1 > mScreenWidth) {
                     changeHeight1 = mScreenWidth;
                 }
-                if (changeHeight1 <= mItemHeight) {
-                    changeHeight1 = mItemHeight;
+                if (changeHeight1 <= ITEM_HEIGHT) {
+                    changeHeight1 = ITEM_HEIGHT;
                 }
                 change = changeHeight1 - item1.getHeight();
                 changeHeight = item0.getHeight() - change;
                 if (changeHeight > mScreenWidth) {
                     changeHeight = mScreenWidth;
                 }
-                if (changeHeight <= mItemHeight) {
-                    changeHeight = mItemHeight;
+                if (changeHeight <= ITEM_HEIGHT) {
+                    changeHeight = ITEM_HEIGHT;
                 }
                 item0.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight));
                 item1.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight1));
             } else {
-                changeHeight1 = (mItemHeight + distanceOneItem) * mScreenWidth / mItemHeight;//缩小
+                changeHeight1 = (ITEM_HEIGHT + distanceOneItem) * mScreenWidth / ITEM_HEIGHT;//缩小
                 if (changeHeight1 > mScreenWidth) {
                     changeHeight1 = mScreenWidth;
                 }
-                if (changeHeight1 <= mItemHeight) {
-                    changeHeight1 = mItemHeight;
+                if (changeHeight1 <= ITEM_HEIGHT) {
+                    changeHeight1 = ITEM_HEIGHT;
                 }
                 change = item1.getHeight() - changeHeight1;
                 changeHeight = item0.getHeight() + change;//放大
                 if (changeHeight > mScreenWidth) {
                     changeHeight = mScreenWidth;
                 }
-                if (changeHeight <= mItemHeight) {
-                    changeHeight = mItemHeight;
+                if (changeHeight <= ITEM_HEIGHT) {
+                    changeHeight = ITEM_HEIGHT;
                 }
                 item0.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight));
                 item1.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, changeHeight1));
@@ -169,8 +166,7 @@ public class NearFragment extends Fragment {
                 .getSystemService(Context.WINDOW_SERVICE);
 
         mScreenWidth = wm.getDefaultDisplay().getWidth();
-        mItemHeight = getResources().getDimensionPixelSize(R.dimen.item_height);
-        Log.d("wufl", "itemHeight=" + mItemHeight + ",mScreenWidth=" + mScreenWidth);
+        ITEM_HEIGHT = getResources().getDimensionPixelSize(R.dimen.item_height);
         mAdapter = new FirstItemMaxAdapter();
         mListView.setAdapter(mAdapter);
         mListView.setOnTouchListener(new View.OnTouchListener() {
@@ -312,7 +308,7 @@ public class NearFragment extends Fragment {
                 isFisrt = false;
                 view.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, mScreenWidth));
             } else {
-                view.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, mItemHeight));
+                view.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, ITEM_HEIGHT));
             }
             viewHolder.cover = (ImageView) view.findViewById(R.id.cover);
 
